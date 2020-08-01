@@ -3,7 +3,6 @@ package com.axonactive.sharing.paging.data.repository
 import com.axonactive.sharing.paging.data.model.User
 import com.axonactive.sharing.paging.data.service.Response
 import com.axonactive.sharing.paging.data.service.UserService
-import io.reactivex.Single
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -28,7 +27,7 @@ class UserRepository {
         retrofit.create(UserService::class.java)
     }
 
-    fun getUsers(page: Int, limits: Int): Single<Response<User>> {
+    suspend fun getUsers(page: Int, limits: Int): Response<User> {
         return api.getUsers(page, limits)
     }
 

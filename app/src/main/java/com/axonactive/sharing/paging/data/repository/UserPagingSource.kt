@@ -1,34 +1,20 @@
 package com.axonactive.sharing.paging.data.repository
 
-import androidx.paging.rxjava2.RxPagingSource
+import androidx.paging.PagingSource
 import com.axonactive.sharing.paging.data.model.User
-import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
-import retrofit2.HttpException
-import java.io.IOException
 
-class UserPagingSource(private val repo: UserRepository) : RxPagingSource<Int, User>() {
+class UserPagingSource(private val repo: UserRepository) : PagingSource<Int, User>() {
 
-    override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, User>> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, User> {
         val nextPagePage = params.key ?: BASE_INDEX
         val prevKey = if (nextPagePage == BASE_INDEX) null else nextPagePage - 1
         val nextKey = nextPagePage + 1
-        return repo.getUsers(nextPagePage, params.loadSize)
-            .subscribeOn(Schedulers.io())
-            .map<LoadResult<Int, User>> { resp ->
-                LoadResult.Page(
-                    data = resp.results,
-                    prevKey = prevKey,
-                    nextKey = nextKey
-                )
-            }
-            .onErrorReturn { e ->
-                when (e) {
-                    is IOException -> LoadResult.Error(e)
-                    is HttpException -> LoadResult.Error(e)
-                    else -> throw e
-                }
-            }
+        return try {
+            val resp = repo.getUsers(nextPagePage, params.loadSize)
+            LoadResult.Page(data = resp.results, prevKey = prevKey, nextKey = nextKey)
+        } catch (e: Throwable) {
+            LoadResult.Error(e)
+        }
     }
 
     companion object {

@@ -3,9 +3,12 @@ package com.axonactive.sharing.paging.feature.user.list
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import com.axonactive.sharing.paging.databinding.ActivityUserListBinding
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class UserListActivity : AppCompatActivity() {
 
@@ -14,6 +17,7 @@ class UserListActivity : AppCompatActivity() {
     private val viewModel by viewModels<UserViewModel>()
     private val userAdapter = UserAdapter(UserComparator)
 
+    @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUserListBinding.inflate(layoutInflater)
@@ -27,8 +31,10 @@ class UserListActivity : AppCompatActivity() {
         userAdapter.addLoadStateListener { loadState ->
             binding.wrl.isRefreshing = loadState.refresh is LoadState.Loading
         }
-        viewModel.users.observe(this, Observer { users ->
-            userAdapter.submitData(lifecycle, users)
-        })
+        lifecycleScope.launch {
+            viewModel.users.collectLatest { data ->
+                userAdapter.submitData(data)
+            }
+        }
     }
 }
