@@ -1,8 +1,7 @@
-package com.axonactive.sharing.paging.feature.user.list
+package com.axonactive.sharing.paging.data.repository
 
 import androidx.paging.rxjava2.RxPagingSource
 import com.axonactive.sharing.paging.data.model.User
-import com.axonactive.sharing.paging.data.repository.UserRepository
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import retrofit2.HttpException
